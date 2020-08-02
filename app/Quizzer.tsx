@@ -1,6 +1,6 @@
 import Page, { PageProps } from './Page';
 import React, { FunctionComponent } from 'react';
-import './quizzer.scss';
+import styles from './quizzer.module.scss';
 import { ribbonURLs, insigniaURLs, InsigniaKeys, RibbonKeys } from './images';
 
 /**
@@ -144,7 +144,7 @@ const getActivityAttendanceString = (attendance: ActivityAttendance) =>
 		? undefined
 		: attendance.ncsas === 0
 			? 'This cadet has attended Encampment.'
-			: `This cadet has attended ${attendance.ncsas} activit${attendance.ncsas === 1 ? 'y' : 'ies'}.`
+			: `This cadet has attended ${attendance.ncsas} National activit${attendance.ncsas === 1 ? 'y' : 'ies'}.`
 
 /**
  * Stores the quiz that a cadet will take
@@ -322,7 +322,7 @@ function getErrorsForQuizInput(quiz: Quiz, input: QuizInput): string[] {
 		(quiz.bronzeMedalOfValor === true && !input.bronze_MVChecked) && `The cadet has recieved the Bronze Medal of Valor` ,
 		(quiz.bronzeMedalOfValor === false && input.bronze_MVChecked) && `The cadet has not recieved the Bronze Medal of Valor` ,
 		(quiz.communityService === CommunityServiceLevel.NONE || quiz.communityService === CommunityServiceLevel.HOURS20 || quiz.communityService === CommunityServiceLevel.HOURS40) && (input.communityServiceChecked) && `The cadet has not done enough service outside of CAP to recieve the community service ribbon` ,
-		(quiz.communityService === CommunityServiceLevel.HOURS60 || quiz.communityService === CommunityServiceLevel.HOURS80) && (input.communityServiceChecked) && `The cadet has done enough service outside of CAP to recieve the community service ribbon` ,
+		(quiz.communityService === CommunityServiceLevel.HOURS60 || quiz.communityService === CommunityServiceLevel.HOURS80) && (!input.communityServiceChecked) && `The cadet has done enough service outside of CAP to recieve the community service ribbon` ,
 		(quiz.cac === CACLevel.NONE || quiz.cac === CACLevel.GROUP) && (input.cACChecked) && `The cadet has not recieved the cac ribbon, the cac ribbon must not be checked` ,
 		(quiz.cac === CACLevel.REGION || quiz.cac === CACLevel.WING || quiz.cac === CACLevel.NATIONAL) && (!input.cACChecked) && `The cadet has recieved the cac ribbon, the cac ribbon must be checked` ,
 		(quiz.airSar === AirSAR.NONE || quiz.airSar === AirSAR.SORTIES5) && (input.airSARChecked) &&`The cadet has not done at least 10 sorties, the air sar ribbon must not be checked` ,
@@ -359,8 +359,8 @@ function getErrorsForQuizInput(quiz: Quiz, input: QuizInput): string[] {
 		(!input.wrightBrothersChecked) && `The cadet has already earned the Wright Brothers ribbon, the Wright Brothers ribbon must be checked` ,
 		(quiz.afaRibbon && !input.afaChecked) && `The cadet has recieved the AFA ribbon, the AFA ribbon must be checked` ,
 		(!quiz.afaRibbon && input.afaChecked) && `The cadet has not recieved the AFA ribbon, the AFA ribbon must not be checked` ,
-		(hasAfoeaRibbon && !input.afaChecked) && `The cadet has recieved the AFOEA ribbon, the AFA ribbon must be checked` ,
-		(!hasAfoeaRibbon && input.afaChecked) && `The cadet has not recieved the AFOEA ribbon, the AFA ribbon must not be checked` ,
+		(hasAfoeaRibbon && !input.afaChecked) && `The cadet has recieved the AFOEA ribbon, the AFOEA ribbon must be checked` ,
+		(!hasAfoeaRibbon && input.afaChecked) && `The cadet has not recieved the AFOEA ribbon, the AFOEA ribbon must not be checked` ,
 
 
 		(quiz.activityAttendance.type === 'NONE' && input.encampmentChecked) && `The cadet has not attended encampment and the encampment ribbon is checked`,
@@ -403,16 +403,16 @@ function getBiography(quiz: Quiz): string {
 }
 
 const InsigniaRadio: FunctionComponent<{ checked: boolean, name: InsigniaKeys, onCheck: (name: InsigniaKeys) => void }> = ({ checked, name, onCheck }) => (
-	<div className="checkbox-div insignia">
+	<div className={styles.inline}>
 		<input type="radio" checked={checked} onChange={() => onCheck(name)} name="grade" id={name} />
-		<label htmlFor={name} title={name}><img className="insigniaImage" src={insigniaURLs[name]} /></label>
+		<label htmlFor={name} title={name}><img className={styles.insigniaImage} src={insigniaURLs[name]} /></label>
 	</div>
 );
 
 const RibbonCheckbox: FunctionComponent<{ checked: boolean, name: RibbonKeys, onCheck: () => void }> = ({ checked, name, onCheck }) => (
-	<div className="checkbox-div ribbon">
+	<div className={styles.inline}>
 		<input type="checkbox" checked={checked} onChange={onCheck} name={name} id={name} />
-		<label htmlFor={name} title={name}><img className="ribbonImage" src={ribbonURLs[name]} /></label>
+		<label htmlFor={name} title={name}><img className={styles.ribbonImage} src={ribbonURLs[name]} /></label>
 	</div>
 );
 
@@ -426,6 +426,7 @@ interface QuizzerStateForInput {
 interface QuizzerStateForResults {
 	type: 'RESULTS',
 	quiz: Quiz,
+	quizInput: QuizInput;
 	errors: string[]
 }
 
@@ -440,6 +441,14 @@ export class Quizzer extends Page<PageProps, QuizzerState> {
 		quizInput: getEmptyQuizInput()
 	};
 
+	public constructor(props: PageProps) {
+		super(props);
+
+		this.formSubmit = this.formSubmit.bind(this);
+		this.tryAgain = this.tryAgain.bind(this);
+		this.newQuiz = this.newQuiz.bind(this);
+	}
+
 	public render() {
 		const state = this.state;
 
@@ -449,13 +458,15 @@ export class Quizzer extends Page<PageProps, QuizzerState> {
 					<h1>Here are your results</h1>
 					{state.errors.map((error, index) => (<div key={index}>{error}</div>))}
 					{state.errors.length === 0 ? <div>You passed!</div> : null}
+					<button onClick={this.tryAgain} type="button">Try again</button>
+					<button onClick={this.newQuiz} type="button">New quiz</button>
+
 				</div>
 			);
 		}
 		
-		
 		return (
-			<div className="quizzer-root">
+			<div className={styles['quizzer-root']}>
 				<div>{getBiography(state.quiz)}</div>
 				<div>
 					<InsigniaRadio
@@ -673,7 +684,9 @@ export class Quizzer extends Page<PageProps, QuizzerState> {
 						onCheck={this.handleImageChecked('recruitChecked')}
 					/>
 				</div>
-				<div>{/* Display a submit button */}</div>
+				<div>
+					<button onClick={this.formSubmit} type="button">Submit</button>
+				</div>
 			</div>
 		);
 	}
@@ -710,5 +723,38 @@ export class Quizzer extends Page<PageProps, QuizzerState> {
 					})
 			)
 		}
+	}
+
+	private formSubmit() {
+		if (this.state.type !== 'INPUT') {
+			return;
+		}
+
+const errors = getErrorsForQuizInput(this.state.quiz, this.state.quizInput)
+
+		this.setState({
+			type: 'RESULTS',
+			errors: errors ,
+			quizInput: this.state.quizInput ,
+			quiz: this.state.quiz
+		})
+
+		// this.state.quizInput
+		// this.state.quiz
+		// getErrorsForQuizInput
+	}
+	private tryAgain(){
+		this.setState({
+			type: 'INPUT' ,
+			quizInput: this.state.quizInput ,
+			quiz: this.state.quiz
+		})
+	}
+	private newQuiz(){
+		this.setState({
+			type: 'INPUT' ,
+			quizInput: getEmptyQuizInput() ,
+			quiz: generateQuiz()
+		})
 	}
 }

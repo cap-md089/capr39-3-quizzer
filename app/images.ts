@@ -1,11 +1,11 @@
 import { QuizInput } from './Quizzer';
 
 import chiefInsignia from './images/800px-CCMSgt.jpg';
-import chiefFsInsignia from './images/FSC.jpg';
+import chiefFsInsignia from './images/FSC_updated.png';
 import lindberghInsignia from './images/800px-MSgt.jpg';
-import lindberghFsInsignia from './images/FSM.jpg';
-import doolittleInsignia from './images/SMSgt.jpg';
-import doolittleFsInsignia from './images/FSS.jpg';
+import lindberghFsInsignia from './images/FSM_updated.png';
+import doolittleInsignia from './images/SMSgt_updated.png';
+import doolittleFsInsignia from './images/FSS_updated.png';
 import achievementRibbon from './images/Achievement_Ribbon.jpg';
 import afaRibbon from './images/AFAribbonCAP.jpg';
 import afsaRibbon from './images/AFSA.jpg';

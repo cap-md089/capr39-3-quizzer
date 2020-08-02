@@ -31,13 +31,23 @@ img.ribbonImage {
 	width: $widthPx * $widthToHeight;
 }
 
+$borderWidth: 2px;
+
+img {
+	border: $borderWidth solid transparent;
+	box-sizing: border-box;
+}
+
 input[type="radio"], input[type="checkbox"] {
 	display: none;
 }
 
 input[type="radio"]:checked + label, input[type="checkbox"]:checked + label {
 	img {
-		border: 1px solid blue;
+		border: $borderWidth solid red;
 	}
 }
 
+.inline {
+	display: inline-block;
+}
